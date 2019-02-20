@@ -17,12 +17,18 @@ import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Bucket4j;
 import io.github.bucket4j.Refill;
 import reactor.core.publisher.Mono;
-
+/**
+ * 令牌桶过滤器，根据ip限制访问
+ * @author wisdom
+ *
+ */
 public class RateLimitByIpGatewayFilter implements GatewayFilter, Ordered {
 	private Logger log = LoggerFactory.getLogger(RateLimitByIpGatewayFilter.class);
-	
+	//令牌桶容量
 	int capacity;
+	//令牌桶每次加入令牌数量
 	int refillTokens;
+	//令牌桶加入令牌频率
 	Duration refillDuration;
 
 	public RateLimitByIpGatewayFilter() {

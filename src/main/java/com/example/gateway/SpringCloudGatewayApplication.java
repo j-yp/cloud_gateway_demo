@@ -17,6 +17,11 @@ public class SpringCloudGatewayApplication {
 		SpringApplication.run(SpringCloudGatewayApplication.class, args);
 	}
 
+	/**
+	 * 这里使用curl来请求，浏览器请求会记录路由地址，不走后台程序
+	 * @param builder
+	 * @return
+	 */
 	@Bean
 	public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
 		return builder.routes()
@@ -29,7 +34,18 @@ public class SpringCloudGatewayApplication {
                 )
 				.route(r -> r.path("/throttle/customer/**")
 						.filters(f -> f.filter(new RateLimitByIpGatewayFilter(10, 1, Duration.ofSeconds(1))))
-						.uri("https://www.baidu.com/").order(0).id("throttle_customer_service"))
+						.uri("https://www.baidu.com/")
+						.order(0)
+						.id("throttle_customer_service"))
+				/*
+				 *  这里添加路径重写过滤器，会将下方的segment拼接到uri中目标路由中
+				 */
+				.route(r -> r.path("/service/**")
+						.filters(f -> f.filter(new RequestTimeFilter())
+								.rewritePath("/service/(?<segment>.*)", "/$\\{segment}"))
+						.uri("http://10.10.11.21/")
+						.order(0)
+						.id("service"))
 				.build();
 
 	}
